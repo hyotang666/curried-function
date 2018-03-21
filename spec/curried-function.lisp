@@ -273,3 +273,108 @@
 
 ;;;; Exceptional-Situations:
 
+(requirements-about CURRIED-LABELS)
+
+;;;; Description:
+; Local curried function.
+
+#+syntax
+(CURRIED-LABELS (label*) &body body) ; => result
+
+#?(curried-labels((3plus(a b c)
+		   (+ a b c)))
+    (3plus 1 2 3))
+=> 6
+
+#?(curried-labels((3plus(a b c)
+		   (+ a b c)))
+    (3plus 1 2))
+:satisfies #`(& (functionp $result)
+		(= 6 (funcall $result 3)))
+
+#?(curried-labels((3plus(a b c)
+		   (+ a b c)))
+    (maplist (lambda(list)
+	       (apply #'3plus list))
+	     '(3 2 1)))
+:satisfies #`(destructuring-bind(first second third)$result
+	       (& 
+		 ; first gets all argumemts.
+		 (= 6 first)
+		 
+		 ; second lacks last argument, so function is returned.
+		 (functionp second)
+		 ; such function evaluates body when last argument is applied.
+		 (= 6 (funcall second 3))
+
+		 ; third get only first argument, so function is returned.
+		 (functionp third)
+		 ; such function awaits rest args.
+		 (functionp (funcall third 2))
+		 (= 6 (funcall (funcall third 2)
+			       3))
+		 (= 6 (funcall third 2 3))))
+;;;; Arguments and Values:
+
+; label := (name lambda-list &body body)
+#?(curried-labels()
+    :valid)
+=> :VALID
+
+; name := (and symbol (not boolean))
+#?(curried-labels(("not-symbol"():dummy))
+    :dummy)
+:signals error
+#?(curried-labels((t():<---invalid))
+    :dummy)
+:signals error
+; Not evaluated.
+#?(curried-labels(((intern "Not evaluated")():dummy))
+    :dummy)
+:signals error
+
+; lambda-list := list which contains only symbol, otherwise signals an error.
+#?(curried-labels((test("not-symbol"):dummy))
+    (test :dummy))
+:signals error
+; This `LAMBDA-LIST` can contain only required parameters.
+; I.e. when `LAMBDA-LIST-KEYWORD` is found, an error is signaled.
+#?(curried-labels((test(&rest |<---invalid|)
+		    '#:dummy))
+    (test))
+:signals error
+; Not evaluated.
+#?(curried-labels((test(append '(not)'(evaluated))
+		    '#:dummy))
+    (test))
+:signals error
+
+; body := implicit progn, evaluated.
+
+; result := T
+
+;;;; Affected By:
+; none
+
+;;;; Side-Effects:
+; none
+
+;;;; Notes:
+; BODY can contain documentation.
+; But it will be discarded.
+#?(curried-labels((has-doc(a b c)
+		    "This documentation is discarded."
+		    (+ a b c)))
+    (has-doc 1 2 3))
+=> 6
+
+; BODY can contain declaration.
+#?(curried-labels((with-declare(a b c)
+		    (declare (ignore b)
+			     (type fixnum a c))
+		    (+ a c)))
+    (with-declare 1 2 3))
+=> 4
+;;;; Exceptional-Situations:
+
+

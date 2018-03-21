@@ -3,7 +3,7 @@
   (:export
     #:defcurry
     #:\\
-    #:curried-labels ; currently not implemented. Is it really need?
+    #:curried-labels
     #:api
     #:section
     ))
@@ -129,8 +129,8 @@
 	    #'curry)))
   #'curry)
 
-(defun <Curry-Form> (body optional-lambda-list &optional types return-type ignores)
-  (let((curry (gensym "CURRY")))
+(defun <Curry-Form> (body optional-lambda-list &optional types return-type ignores name)
+  (let((curry (or name (gensym "CURRY"))))
     (labels((ENTRY-POINT(list types)
 	      (if(endp list)
 		(<BODY-FORM> body)
@@ -236,3 +236,27 @@
 	      (rec rest (cdr gensyms)(push (car gensyms)acc))
 	      (rec rest gensyms (push arg acc)))))
     `((,op ,@(rec args gensyms)))))
+
+;;;; CURRIED-LABELS
+(defmacro curried-labels(labels &body body)
+  `(LABELS,(mapcar #'<Label-form> labels)
+     ,@body))
+
+(defun <Label-form> (definition)
+  ;; binds
+  (destructuring-bind(NAME lambda-list &body body)definition
+    ;; Trivial syntax check.
+    (check-type name (and symbol (not (or keyword boolean))))
+    (assert (every #'symbolp lambda-list))
+    (assert (notany (lambda(elt)
+		      (find elt lambda-list-keywords))
+		    lambda-list))
+    (multiple-value-bind(BODY declarations)(alexandria:parse-body body :documentation t)
+      (multiple-value-bind(API other-declares IGNORES)(parse-declarations declarations)
+	(setf body ; as canonicalize
+	      (append (when other-declares
+			`((DECLARE ,@other-declares)))
+		      body))
+	(let((OPTIONAL-LAMBDA-LIST(optional-lambda-list lambda-list)))
+	  ;; body
+	  (caadr(<Curry-Form> body optional-lambda-list (cadr api)(caddr api)ignores name)))))))
