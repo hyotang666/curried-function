@@ -10,4 +10,5 @@
 
 ;; Perform method below is added by JINGOH.GENERATOR.
 (defmethod perform ((o test-op) (c (eql (find-system "curried-function"))))
-  (test-system :curried-function.test))
+  (handler-bind((recursive-operate #'muffle-warning))
+    (test-system :curried-function.test)))
