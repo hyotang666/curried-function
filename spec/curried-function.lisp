@@ -123,6 +123,17 @@
 ,:test equal
 #?(declare-api 'string "Hello" #\!) => unspecified ; implementation may error or warning or ...?
 
+; Implicit `BLOCK` is established.
+#?(defcurry can-return(a b)
+    (if a
+      (+ a b)
+      (return-from can-return :returned)))
+=> CAN-RETURN
+,:before (fmakunbound 'can-return)
+
+#?(can-return 1 2) => 3
+#?(can-return nil 2) => :RETURNED
+
 ; `DEFCURRY`ed function has its own compiler-macro.
 #?(defcurry compiler-macro-example(a b c)
     (+ a b c))
@@ -133,7 +144,8 @@
 => (let((a 1)
 	(b 2)
 	(c 3))
-     (+ a b c))
+     (block compiler-macro-example
+	    (+ a b c)))
 ,:test equal
 
 #?(compiler-macroexpand-1 '(compiler-macro-example 1 2))
@@ -142,7 +154,8 @@
      (b 2))
   (labels((curry(&optional(c nil c-p))
 	    (if c-p
-	      (+ a b c)
+	      (block compiler-macro-example
+		     (+ a b c))
 	      #'curry)))
     #'curry))
 ,:test sexp=
@@ -153,10 +166,12 @@
   (labels((curry(&optional(b nil b-p)(c nil c-p))
 	    (if b-p
 	      (if c-p
-		(+ a b c)
+		(block compiler-macro-example
+		       (+ a b c))
 		(labels((curry(&optional(c nil c-p))
 			  (if c-p
-			    (+ a b c)
+			    (block compiler-macro-example
+				   (+ a b c))
 			    #'curry)))
 		  #'curry))
 	      #'curry)))
@@ -375,6 +390,15 @@
 		    (+ a c)))
     (with-declare 1 2 3))
 => 4
+
+; Implicit `BLOCK` is established.
+#?(curried-labels((can-return(a b)
+		    (if a
+		      (+ a b)
+		      (return-from can-return :returned))))
+    (can-return nil 1))
+=> :RETURNED
+
 ;;;; Exceptional-Situations:
 
 

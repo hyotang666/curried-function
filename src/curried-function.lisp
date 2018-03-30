@@ -26,7 +26,7 @@
       (setf body ; as canonicalize
 	    (append (when other-declares
 		      `((DECLARE ,@other-declares)))
-		    body))
+		    `((BLOCK ,name ,@body))))
       (let((OPTIONAL-LAMBDA-LIST(optional-lambda-list lambda-list)))
 	;; body
 	`(EVAL-WHEN(:COMPILE-TOPLEVEL :LOAD-TOPLEVEL :EXECUTE)
@@ -256,7 +256,7 @@
 	(setf body ; as canonicalize
 	      (append (when other-declares
 			`((DECLARE ,@other-declares)))
-		      body))
+		      `((BLOCK ,name ,@body))))
 	(let((OPTIONAL-LAMBDA-LIST(optional-lambda-list lambda-list)))
 	  ;; body
 	  (caadr(<Curry-Form> body optional-lambda-list (cadr api)(caddr api)ignores name)))))))
