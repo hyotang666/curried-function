@@ -8,7 +8,5 @@
   :components
   ((:file "curried-function")))
 
-;; Perform method below is added by JINGOH.GENERATOR.
-(defmethod perform ((o test-op) (c (eql (find-system "curried-function"))))
-  (handler-bind((recursive-operate #'muffle-warning))
-    (test-system :curried-function.test)))
+(defmethod component-depends-on ((o test-op) (c (eql (find-system "curried-function"))))
+  (append (call-next-method) '((test-op "curried-function.test"))))
