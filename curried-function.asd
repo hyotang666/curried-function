@@ -2,7 +2,9 @@
 (in-package :asdf)
 (defsystem "curried-function"
   :depends-on
-  ("alexandria")
+  (
+   "alexandria" ; public domain utilities.
+   )
   :pathname
   "src/"
   :components
