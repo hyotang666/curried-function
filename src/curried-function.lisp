@@ -6,6 +6,7 @@
     #:curried-labels
     #:api
     #:section
+    #:syntax	; for readtable name.
     ))
 (in-package :curried-function)
 
@@ -260,3 +261,12 @@
 	(let((OPTIONAL-LAMBDA-LIST(optional-lambda-list lambda-list)))
 	  ;; body
 	  (caadr(<Curry-Form> body optional-lambda-list (cadr api)(caddr api)ignores name)))))))
+
+;;;; READ-TABLE
+(defun |#`-reader|(stream char number)
+  (declare(ignore char number))
+  `(section ,@(read stream t t t)))
+
+(named-readtables:defreadtable syntax
+  (:merge :standard)
+  (:dispatch-macro-char #\# #\` '|#`-reader|))

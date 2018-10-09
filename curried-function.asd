@@ -3,6 +3,7 @@
 (defsystem "curried-function"
   :depends-on
   (
+   "named-readtables"   ; readtable.
    "alexandria" ; public domain utilities.
    )
   :pathname
