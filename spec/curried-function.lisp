@@ -1,5 +1,6 @@
 (defpackage :curried-function.spec
   (:use :cl :jingoh :curried-function)
+  (:shadowing-import-from :jingoh #:syntax)
   (:import-from :curried-function #:curry)
   (:import-from :introspect-environment #:compiler-macroexpand-1)
   (:import-from :jingoh.tester #:sexp=)
