@@ -24,7 +24,8 @@
 #?(three-plus 1 2 3) => 6
 
 #?(three-plus 1 2)
-:satisfies #`(&
+:satisfies (lambda($return)
+	     (&
 	       ;; Curried-function is returned, because last arg is lack.
 	       (functionp $return)
 
@@ -36,10 +37,11 @@
 	       (= 6 (funcall $return 3))
 
 	       ;; Example of supplying another arg.
-	       (= 7 (funcall $return 4)))
+	       (= 7 (funcall $return 4))))
 
 #?(three-plus 1)
-:satisfies #`(&
+:satisfies (lambda($return)
+	     (&
 	       ;; Curried-function is returned, because rest 2 args are lack.
 	       (functionp $return)
 
@@ -51,7 +53,7 @@
 
 	       ;; You can supply rest args at once.
 	       (= 6 (funcall $return 2 3))
-	       )
+	       ))
 
 ;;;; Arguments and Values:
 
@@ -194,7 +196,8 @@
 (\\ lambda-list &body body) ; => result
 
 #?(\\(a b c)(+ a b c))
-:satisfies #`(& (functionp $return)
+:satisfies (lambda($return)
+	     (& (functionp $return)
 		(functionp (funcall $return))
 		(functionp (funcall $return 1))
 		(functionp (funcall (funcall $return 1)2))
@@ -203,7 +206,7 @@
 		(= 6 (funcall (funcall (funcall $return 1)2)3))
 		(= 6 (funcall $return 1 2 3))
 		(= 6 (funcall (funcall $return)1 2 3))
-		)
+		))
 
 ;;;; Arguments and Values:
 
@@ -249,19 +252,21 @@
 ; args := T
 ; When argument is symbol named "_", return curried function which awaits such position's actual argument.
 #?(section concatenate 'string _ " world")
-:satisfies #`(& (functionp $return)
+:satisfies (lambda($return)
+	     (& (functionp $return)
 		(string= "Hello world"
-			 (funcall $return "Hello")))
+			 (funcall $return "Hello"))))
 ; Multiple _ is valid.
 ; In such cases, arguments are supplied by left to right order.
 #?(section concatenate _ _ " world")
-:satisfies #`(& (functionp $return)
+:satisfies (lambda($return)
+	     (& (functionp $return)
 		(functionp (funcall $return 'string))
 		(string= "Hello world"
 			 (funcall (funcall $return 'string)
 				  "Hello"))
 		(string= "Good-bye world"
-			 (funcall $return 'string "Good-bye")))
+			 (funcall $return 'string "Good-bye"))))
 
 ; result := (or function T)
 ; If there is no underscore, the body is evaluated.
@@ -272,9 +277,10 @@
 => "Hello"
 ,:test string=
 #?(section concatenate 'string "Hello " _)
-:satisfies #`(& (functionp $return)
+:satisfies (lambda($return)
+	     (& (functionp $return)
 		(string= "Hello world"
-			 (funcall $return "world")))
+			 (funcall $return "world"))))
 ; Otherwise curried function is returned.
 #?(section concatenate _ "Hello" " world")
 :be-the function
@@ -305,15 +311,17 @@
 #?(curried-labels((3plus(a b c)
 		   (+ a b c)))
     (3plus 1 2))
-:satisfies #`(& (functionp $result)
-		(= 6 (funcall $result 3)))
+:satisfies (lambda($result)
+	     (& (functionp $result)
+		(= 6 (funcall $result 3))))
 
 #?(curried-labels((3plus(a b c)
 		   (+ a b c)))
     (maplist (lambda(list)
 	       (apply #'3plus list))
 	     '(3 2 1)))
-:satisfies #`(destructuring-bind(first second third)$result
+:satisfies (lambda($result)
+	     (destructuring-bind(first second third)$result
 	       (& 
 		 ; first gets all argumemts.
 		 (= 6 first)
@@ -329,7 +337,7 @@
 		 (functionp (funcall third 2))
 		 (= 6 (funcall (funcall third 2)
 			       3))
-		 (= 6 (funcall third 2 3))))
+		 (= 6 (funcall third 2 3)))))
 ;;;; Arguments and Values:
 
 ; label := (name lambda-list &body body)

@@ -1,7 +1,7 @@
 ; vim: ft=lisp et
 (in-package :asdf)
 (defsystem :curried-function.test
-  :version "0.0.0"
+  :version "0.0.1"
   :depends-on
   (:jingoh "curried-function" "introspect-environment")
   :components
