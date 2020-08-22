@@ -298,3 +298,7 @@
 (named-readtables:defreadtable syntax
   (:merge :standard)
   (:dispatch-macro-char #\# #\` '|#`-reader|))
+
+;;;; PRETTY-PRINTER
+
+(set-pprint-dispatch '(cons (member defcurry)) (pprint-dispatch '(defun)))
