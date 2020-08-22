@@ -302,3 +302,6 @@
 ;;;; PRETTY-PRINTER
 
 (set-pprint-dispatch '(cons (member defcurry)) (pprint-dispatch '(defun)))
+
+(set-pprint-dispatch '(cons (member curried-labels))
+                     (pprint-dispatch '(labels)))

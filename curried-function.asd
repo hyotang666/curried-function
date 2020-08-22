@@ -1,7 +1,7 @@
 ; vim: ft=lisp et
 (in-package :asdf)
 (defsystem "curried-function"
-  :version "0.0.2"
+  :version "0.0.3"
   :depends-on
   (
    "named-readtables"   ; readtable.
