@@ -234,7 +234,7 @@
       (<section-form> op args)))
 
 (defun <section-form> (op args)
-  (let* ((gensyms (gensyms (count-if #'underscorep args)))
+  (let* ((gensyms (alexandria:make-gensym-list (count-if #'underscorep args)))
          (optional-lambda-list (optional-lambda-list gensyms)))
     (if gensyms
         (<curry-form> (<section-body-form> op args gensyms)
@@ -242,10 +242,6 @@
         `(,op ,@args))))
 
 (defun underscorep (thing) (and (symbolp thing) (string= "_" thing)))
-
-(defun gensyms (num)
-  (loop :repeat num
-        :collect (gensym)))
 
 (defun <section-body-form> (op args gensyms)
   (labels ((rec (args gensyms &optional acc)
